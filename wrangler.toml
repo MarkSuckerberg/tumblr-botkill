@@ -1,0 +1,6 @@
+name = "tumblr-botkill"
+main = "./src/index.ts"
+compatibility_date = "2022-05-03"
+[triggers]
+crons = ["* * * * *"]
+
