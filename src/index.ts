@@ -4,6 +4,6 @@ export default {
 	},
 
 	async scheduled(event: ScheduledEvent, env: Object, ctx: Object) {
-		return new Response(`scheduled event: ${ctx.event}`);
+		console.log(`scheduled event: ${event.cron}`);
 	},
 };
