@@ -1,6 +1,7 @@
 name = "tumblr-botkill"
 main = "./src/index.ts"
 compatibility_date = "2022-05-03"
-[triggers]
-crons = ["* * * * *"]
 
+[vars]
+TUMBLR_CONSUMER_KEY = "DpmUXBvepIXA4wC8HZYSkKWdjuabcXTa5VFrOiGddqlZlGyFHU"
+#TUMBLR_CONSUMER_SECRET = "SetThisWithASecret"
