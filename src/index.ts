@@ -157,7 +157,6 @@ export default {
 		endpoint: string,
 		query?: Record<string, string>
 	): Promise<JSON> {
-		console.log(`Accessing: ${endpoint} with query: ${JSON.stringify(query)}`);
 		const request = await fetch(`https://api.tumblr.com/v2/${endpoint}`, {
 			method: query ? 'POST' : 'GET',
 			headers: {
@@ -170,9 +169,6 @@ export default {
 		});
 
 		const response: any = await request.json();
-
-		console.log(`Response: ${JSON.stringify(response.response || request.status, null, 2)}`);
-
 		return response.response;
 	},
 };
