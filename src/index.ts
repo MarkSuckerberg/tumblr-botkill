@@ -13,6 +13,57 @@ interface TumblrToken {
 	scope?: string;
 }
 
+//TODO: Improve this by making it a separate file or something
+const htmlHead = `
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<!--Credit for modified style: https://github.com/KeenRivals/bestmotherfucking.website-->
+		<style>
+			@media (prefers-color-scheme: dark) {
+				body {
+					color: #fff;
+					background: #000;
+				}
+				a:link {
+					color: #cdf;
+				}
+				a:hover,
+				a:visited:hover {
+					color: #def;
+				}
+				a:visited {
+					color: #dcf;
+				}
+			}
+			body {
+				margin: 1em auto;
+				max-width: 40em;
+				padding: 0 0.62em;
+				font: 1.2em/1.62 sans-serif;
+			}
+			h1,
+			h2,
+			h3 {
+				line-height: 1.2;
+				text-align: center;
+			}
+			@media print {
+				body {
+					max-width: none;
+				}
+			}
+		</style>
+		<title>Tumblr Botkill</title>
+	</head>
+	<body>
+		<h1>Tumblr Botkill</h1>
+`;
+const htmlTail = '</body></html>';
+
 export default {
 	async fetch(request: Request, env: TumblrBotEnv, ctx: Object) {
 		const url = new URL(request.url);
@@ -130,16 +181,17 @@ export default {
 		}
 
 		return new Response(
-			'<h1>Bad blogs:</h1><hr/>' +
+			htmlHead +
 				followersResponse
 					.filter(blog => !blog.following && blog.updated === 0)
 					.map(blog => `<li><a href="https://${blog.name}.tumblr.com">${blog.name}</a></li>`)
 					.join('')
 					.concat(
 						writeAccess
-							? '<h2>Accounts blocked.</h2>'
-							: '<h2><a href="/auth?write=true">Block All (WARNING, UNTESTED)</a></h2>'
-					),
+							? '<h2>Bot Accounts blocked.</h2>'
+							: '<h2><a href="/auth?write=true">Block all bots in list (Use at your own risk.)</a></h2>'
+					) +
+				htmlTail,
 			{
 				status: 200,
 				headers: {
