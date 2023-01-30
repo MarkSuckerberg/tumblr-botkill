@@ -1,0 +1,21 @@
+name: Deploy
+
+on:
+  push:
+    branches: [ "master" ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    env:
+      TUMBLR_CONSUMER_SECRET: ${{ secrets.TUMBLR_CONSUMER_SECRET }}
+    
+    steps:
+      - name: Deploy to Cloudflare Workers with Wrangler
+        uses: cloudflare/wrangler-action@latest
+        with:
+          # Cloudflare API Token
+          apiToken: ${{ secrets.CF_API_TOKEN }}
+          # A new line deliminated string of environment variable names that should be configured as Worker secrets
+          secrets: TUMBLR_CONSUMER_SECRET
