@@ -19,5 +19,5 @@ jobs:
           # Cloudflare API Token
           apiToken: ${{ secrets.CF_API_TOKEN }}
           # A new line deliminated string of environment variable names that should be configured as Worker secrets
-          secrets: TUMBLR_CONSUMER_SECRET
-          command: publish --name tumblr-botkill
+          secrets: |
+            TUMBLR_CONSUMER_SECRET
