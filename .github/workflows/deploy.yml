@@ -8,12 +8,12 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    
+
     env:
       TUMBLR_CONSUMER_SECRET: ${{ secrets.TUMBLR_CONSUMER_SECRET }}
-    
+
     steps:
-      - name: Deploy to Cloudflare Workers with Wrangler
+      - name: Publish
         uses: cloudflare/wrangler-action@2.0.0
         with:
           # Cloudflare API Token
