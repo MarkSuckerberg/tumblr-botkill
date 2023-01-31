@@ -1,3 +1,5 @@
+import { parse } from 'cookie';
+
 interface TumblrBotEnv {
 	TUMBLR_CONSUMER_KEY: string;
 	TUMBLR_CONSUMER_SECRET: string;
@@ -93,13 +95,18 @@ export default {
 		const url = new URL(request.url);
 		const code = url.searchParams.get('code');
 		const write = url.searchParams.get('write');
+		const paramState = url.searchParams.get('state');
+		const cookieState = parse(request.headers.get('Cookie') || '')['__Host-state'];
 
 		// If the request doesn't have a code, someone is trying to start the auth process
 		if (code == undefined) {
 			return await this.authRedirect(url.origin + url.pathname, consumerID, write === 'true');
-		} else {
+		}
+		//Ensure that the state param and the state cookie match
+		else if (paramState === cookieState) {
 			return await this.handleCallback(url.origin + url.pathname, consumerID, consumerSecret, code);
 		}
+		return new Response('Invalid state', { status: 400 });
 	},
 
 	async authRedirect(
@@ -107,16 +114,28 @@ export default {
 		consumerID: string,
 		writeAccess: boolean
 	): Promise<Response> {
+		const state = crypto.getRandomValues(new Uint32Array(1))[0].toString();
 		const params = new URLSearchParams({
 			response_type: 'code',
 			client_id: consumerID,
 			redirect_uri: redirectURI,
 			scope: writeAccess ? 'basic write' : 'basic',
 			approval_prompt: 'auto',
-			state: 'tumblrbotkill',
+			state: state,
 		});
 
-		return Response.redirect(`https://www.tumblr.com/oauth2/authorize?${params.toString()}}`, 302);
+		return new Response(
+			htmlHead +
+				`<a href=https://www.tumblr.com/oauth2/authorize?${params.toString()}>Login with Tumblr</a> - Bot List (Doesn't block anyone, just lists)` +
+				htmlTail,
+			{
+				status: 200,
+				headers: {
+					'Content-Type': 'text/html',
+					'Set-Cookie': `__Host-state=${state}; path=/; secure; HttpOnly; SameSite=Lax`,
+				},
+			}
+		);
 	},
 
 	async handleCallback(
