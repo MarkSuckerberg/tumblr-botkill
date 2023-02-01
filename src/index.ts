@@ -176,7 +176,7 @@ export default {
 		return await this.getTumblrFollowers(
 			token.access_token!,
 			consumerID,
-			!!token.scope!.includes('write')
+			token.scope!.includes('write')
 		);
 	},
 
@@ -187,21 +187,37 @@ export default {
 	): Promise<Response> {
 		const user: any = await this.accessTumblrAPI(token, 'user/info');
 
-		const followers: any = await this.accessTumblrAPI(token, `blog/${user.user.name}/followers`);
-		const followersResponse: any[] = followers.users;
+		const allFollowers: any[] = new Array();
 
+		//Tumblr limits the number of followers returned to 20 at a time, so we need to loop through all of them
+		for (let page = 0; true; page++) {
+			//Get the followers
+			const followersResponse: any = await this.accessTumblrAPI(
+				token,
+				`blog/${user.user.name}/followers?offset=${page * 20}`
+			);
+			const followersPartial = followersResponse.users;
+			allFollowers.push(...followersPartial);
+			//If we got less than 20 followers, we've reached the end
+			if (followersPartial.length !== 20) {
+				break;
+			}
+		}
+
+		//If we have write access, block all of the followers returned that seem like bots
 		if (writeAccess) {
 			await this.accessTumblrAPI(token, `blog/${user.user.name}/blocks/bulk`, {
-				blocked_tumblelogs: followersResponse
+				blocked_tumblelogs: allFollowers
 					.filter(blog => !blog.following && blog.updated === 0)
 					.map(blog => blog.name)
 					.join(','),
 			});
 		}
 
+		//Show the list of followers that seem like bots to the user
 		return new Response(
 			htmlHead +
-				followersResponse
+				allFollowers
 					.filter(blog => !blog.following && blog.updated === 0)
 					.map(blog => `<li><a href="https://${blog.name}.tumblr.com">${blog.name}</a></li>`)
 					.join('')
