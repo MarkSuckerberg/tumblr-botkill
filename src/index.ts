@@ -100,7 +100,7 @@ export default {
 
 		// If the request doesn't have a code, someone is trying to start the auth process
 		if (code == undefined) {
-			return await this.authRedirect(url.origin + url.pathname, consumerID, write === 'true');
+			return await this.authRedirect(url.origin + url.pathname, consumerID);
 		}
 		//Ensure that the state param and the state cookie match
 		else if (paramState === cookieState) {
@@ -109,24 +109,24 @@ export default {
 		return new Response('Invalid state', { status: 400 });
 	},
 
-	async authRedirect(
-		redirectURI: string,
-		consumerID: string,
-		writeAccess: boolean
-	): Promise<Response> {
+	async authRedirect(redirectURI: string, consumerID: string): Promise<Response> {
 		const state = crypto.getRandomValues(new Uint32Array(1))[0].toString();
 		const params = new URLSearchParams({
 			response_type: 'code',
 			client_id: consumerID,
 			redirect_uri: redirectURI,
-			scope: writeAccess ? 'basic write' : 'basic',
+			scope: 'basic',
 			approval_prompt: 'auto',
 			state: state,
 		});
 
+		const writeParams = new URLSearchParams(params);
+		writeParams.set('scope', 'basic write');
+
 		return new Response(
 			htmlHead +
-				`<a href=https://www.tumblr.com/oauth2/authorize?${params.toString()}>Login with Tumblr</a> - Bot List (Doesn't block anyone, just lists)` +
+				`<a href=https://www.tumblr.com/oauth2/authorize?${params.toString()}>Login with Tumblr</a> - Lists bots (Doesn't block anyone, just lists.)<br>` +
+				`<a href=https://www.tumblr.com/oauth2/authorize?${writeParams.toString()}>Login with Tumblr (Write access)</a> - Blocks bots (Use at your own risk!)` +
 				htmlTail,
 			{
 				status: 200,
@@ -224,7 +224,7 @@ export default {
 					.concat(
 						writeAccess
 							? '<h2>Bot Accounts blocked.</h2>'
-							: '<h2><a href="/auth?write=true">Block all bots in list (Use at your own risk.)</a></h2>'
+							: '<h2><a href="/auth">Return to start to actually block the bots</a></h2>'
 					) +
 				htmlTail,
 			{
