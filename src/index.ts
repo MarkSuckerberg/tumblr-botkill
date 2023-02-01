@@ -223,7 +223,7 @@ export default {
 					.join('')
 					.concat(
 						writeAccess
-							? '<h2>Bot Accounts blocked.</h2>'
+							? '<h2>Bot Accounts listed above blocked.</h2>'
 							: '<h2><a href="/auth">Return to start to actually block the bots</a></h2>'
 					) +
 				htmlTail,
